@@ -5,47 +5,60 @@ SRH.UI.MainFrame = SRH.UI.MainFrame or {}
 
 local MainFrame = SRH.UI.MainFrame
 
-local function SetSpellText(fontString, prefix, value)
-    fontString:SetText(prefix .. ": " .. tostring(value or 0))
+local function SetText(fontString, label, value)
+    if fontString then
+        fontString:SetText(label .. ": " .. tostring(value or 0))
+    end
 end
 
 function MainFrame:Create()
-    if self.Frame then return end
+    if self.Frame or not CreateFrame or not UIParent then
+        return
+    end
 
-    local f = CreateFrame("Frame", "SRH_MainFrame", UIParent)
-    f:SetWidth(280)
-    f:SetHeight(90)
-    f:SetPoint("CENTER", UIParent, "CENTER", 0, -200)
-    f:SetBackdrop({
+    local frame = CreateFrame("Frame", "SRH_MainFrame", UIParent)
+    frame:SetSize(300, 110)
+    frame:SetPoint("CENTER", UIParent, "CENTER", 0, -180)
+    frame:SetBackdrop({
         bgFile = "Interface\\DialogFrame\\UI-DialogBox-Background",
         edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border",
         tile = true,
         tileSize = 16,
         edgeSize = 12,
-        insets = { left = 3, right = 3, top = 3, bottom = 3 }
+        insets = { left = 3, right = 3, top = 3, bottom = 3 },
     })
-    f:SetMovable(true)
-    f:EnableMouse(true)
-    f:RegisterForDrag("LeftButton")
-    f:SetScript("OnDragStart", f.StartMoving)
-    f:SetScript("OnDragStop", f.StopMovingOrSizing)
 
-    f.PrimaryIcon = SRH.UI.Icons:Create(f, 64)
-    f.PrimaryIcon:SetPoint("LEFT", f, "LEFT", 12, 0)
+    frame:SetMovable(true)
+    frame:EnableMouse(true)
+    frame:RegisterForDrag("LeftButton")
+    frame:SetScript("OnDragStart", frame.StartMoving)
+    frame:SetScript("OnDragStop", frame.StopMovingOrSizing)
 
-    f.QueueIcons = SRH.UI.Queue:Create(f)
+    frame.PrimaryIcon = SRH.UI.Icons:Create(frame, 64)
+    if frame.PrimaryIcon then
+        frame.PrimaryIcon:SetPoint("LEFT", frame, "LEFT", 12, 10)
+    end
 
-    f.RPText = f:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-    f.RPText:SetPoint("BOTTOMLEFT", f, "BOTTOMLEFT", 12, 10)
+    frame.QueueIcons = SRH.UI.Queue:Create(frame)
 
-    f.TargetText = f:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-    f.TargetText:SetPoint("BOTTOMLEFT", f.RPText, "TOPLEFT", 0, 4)
+    frame.RPText = frame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+    frame.RPText:SetPoint("BOTTOMLEFT", frame, "BOTTOMLEFT", 12, 8)
 
-    self.Frame = f
+    frame.TargetText = frame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+    frame.TargetText:SetPoint("BOTTOMLEFT", frame.RPText, "TOPLEFT", 0, 4)
 
-    SRH.Events:Register("SRH_STATE_UPDATED", "UI_MainFrame_Update", function(st)
-        if not self.Frame then return end
-        SetSpellText(self.Frame.RPText, "RP", st.RP)
-        SetSpellText(self.Frame.TargetText, "Targets", st.TargetCount)
+    self.Frame = frame
+
+    SRH.Events:Register("SRH_STATE_UPDATED", "UI_MAINFRAME_UPDATE", function(state)
+        if not MainFrame.Frame then return end
+
+        SetText(MainFrame.Frame.RPText, "RP", state.RP)
+        SetText(MainFrame.Frame.TargetText, "Targets", state.TargetCount)
+
+        if MainFrame.Frame.PrimaryIcon then
+            MainFrame.Frame.PrimaryIcon:SetSpellName(state.Recommendation)
+        end
+
+        SRH.UI.Queue:Update(MainFrame.Frame.QueueIcons, state.Queue)
     end)
 end

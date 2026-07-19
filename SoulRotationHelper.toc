@@ -1,0 +1,21 @@
+## Interface: 30300
+## Title: SoulRotationHelper
+## Notes: Modular rotation helper for Project Ascension
+## Author: Magnusbekhoj
+## Version: 0.2.0-alpha
+
+Core/Init.lua
+Core/Logger.lua
+Core/Utils.lua
+Core/Events.lua
+Core/State.lua
+
+Data/SpellDB.lua
+Rotation/Rules.lua
+Rotation/Combo.lua
+Rotation/Engine.lua
+Core/Engine.lua
+
+UI/Icons.lua
+UI/Queue.lua
+UI/MainFrame.lua
